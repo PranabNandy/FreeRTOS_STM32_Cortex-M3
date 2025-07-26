@@ -5,6 +5,14 @@
 - STM32VLDISCOVERY board
 - Only RTOS kernel
 
+## Install the these dependency
+- sudo apt update
+- sudo apt upgrade
+- sudo apt install qemu-system-aarch64
+- sudo apt install gcc-aarch64-linux-gnu
+- sudo apt install crossbuild-essential-arm64
+
+  
 # Resources
 - [FreeRTOS Documentation](https://github.com/FreeRTOS/FreeRTOS-Kernel-Book/releases/download/V1.1.0/Mastering-the-FreeRTOS-Real-Time-Kernel.v1.1.0.pdf)
 - [FreeRTOS Kernel Repo](https://github.com/FreeRTOS/FreeRTOS-Kernel)
