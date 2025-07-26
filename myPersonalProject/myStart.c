@@ -1,0 +1,4 @@
+
+void myStartFunction(){
+		return;
+}
