@@ -37,9 +37,9 @@ void myStartFunction(){
 			*dst++ = 0;      // Zero Word and Increment Pointers
 		}
 		
-		xReturn=xTaslCreate(vTask1, "T1", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
-		xReturn=xTaslCreate(vTask2, "T2", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		xReturn=xTaskCreate(vTask1, "T1", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
+		xReturn=xTaskCreate(vTask2, "T2", configMINIMAL_STACK_SIZE, NULL, 1, NULL);
 //		vTaskStartScheduler();
-        vPortTaskScheduler();
+        vPortEndScheduler();
 		return;
 }
