@@ -8,6 +8,7 @@ FREERTOS_PATH = ../FreeRTOS-Kernel
 # Object files
 OBJ = cpuBoot.o myStart.o portFunction.o\
 	  $(FREERTOS_PATH)/tasks.o \
+	  $(FREERTOS_PATH)/list.o \
 	  $(FREERTOS_PATH)/portable/MemMang/heap_4.o \
 	  $(FREERTOS_PATH)/portable/GCC/ARM_CM3/port.o \
 	  
