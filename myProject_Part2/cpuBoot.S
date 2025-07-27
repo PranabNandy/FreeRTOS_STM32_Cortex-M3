@@ -1,6 +1,6 @@
     .section .vectors
 vector_table:
-    .word _stack          /* Initial stack pointer */
+    .word __StackTop          /* Initial stack pointer */
     .word reset_handler   /* Reset handler */
 	.word default
 	.word default
