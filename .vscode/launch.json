@@ -4,7 +4,7 @@
           "name": "GDB",
           "type": "cppdbg",
           "request": "launch",
-          "program": "${workspaceFolder}/port/main.elf",
+          "program": "${workspaceFolder}/myProject_Part2/main.elf",
           "args": [],
           "stopAtEntry": true,
           "cwd": "${workspaceFolder}",
