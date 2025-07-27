@@ -28,7 +28,6 @@ reset_handler:
 	mov r2, #2
 	add r3,r1,r2
     b .                   /* Infinite loop (safety) */
-	
     .section .text
     .align 1
     .type default, %function
