@@ -38,7 +38,7 @@ reset_handler:
 	
 	mov r5, #0
 	
-	b .
+	b myStartFunction
 	
 	.section .text
 	.align 1
@@ -54,6 +54,8 @@ systick_handler:
 	push {r0-r3}
 	
 	add r5, r5, #1
+	b reset_handler
 break_here:
 	bx lr
+
 	
