@@ -6,12 +6,15 @@
 
 .equ timout,        0x00ffffff
 
+.extern SysTick_Handler5
+
+
 .section .vectors
 vector_table:
 	.word 0x20001000
 	.word reset_handler
 .org 0x3C
-	.word systick_handler
+	.word SysTick_Handler5
 	.zero 400
 	
 	
@@ -42,8 +45,8 @@ reset_handler:
 
 	.section .text
 	.align 1
-	.type systick_handler2, %function
-systick_handler2:
+	.type systick_handler1, %function
+systick_handler1:
 	push {r4-r7}
 	add r5, r5, #1
     pop  {r4-r7}
@@ -70,4 +73,5 @@ systick_handler2:
 	bx lr
 
 	
+
 
