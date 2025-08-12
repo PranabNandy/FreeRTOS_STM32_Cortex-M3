@@ -39,11 +39,21 @@ reset_handler:
 	mov r5, #0
 	
 	b myStartFunction
-	
+
 	.section .text
 	.align 1
-	.type systick_handler, %function
-systick_handler:
+	.type systick_handler2, %function
+systick_handler2:
+	push {r4-r7}
+	add r5, r5, #1
+    pop  {r4-r7}
+	bx lr
+
+
+	.section .text
+	.align 1
+	.type systick_handler2, %function
+systick_handler2:
 	push {r4-r7}
 	
 	mov r0, r8
@@ -54,8 +64,10 @@ systick_handler:
 	push {r0-r3}
 	
 	add r5, r5, #1
-	b reset_handler
-break_here:
+
+    pop  {r4-r7}
+
 	bx lr
 
 	
+
