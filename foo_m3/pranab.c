@@ -5,6 +5,26 @@ volatile uint32_t systick_ticks = 0;
 volatile uint8_t current_task = 0; // 0 = foo, 1 = myStartFunction
 
 
+//------------------------ My Special Code -----------------
+extern uint32_t _si_ramfunc; // load address of .ramfunc in Flash
+extern uint32_t _sramfunc;   // start of .ramfunc in RAM
+extern uint32_t _eramfunc;   // end of .ramfunc in RAM
+
+
+void Reset_Handler2(void) {
+    uint32_t *src, *dst;
+
+    // Copy .ramfunc
+    src = &_si_ramfunc;
+    for (dst = &_sramfunc; dst < &_eramfunc; )
+        *dst++ = *src++;
+
+    // Call main
+    main();
+}
+
+//--------------------------------------------------------------
+
 //__attribute__((section(".data")))   --> Need to verify
 /*
     Here’s why you see that "Cannot find bounds of current function" and why GDB can’t show it:
