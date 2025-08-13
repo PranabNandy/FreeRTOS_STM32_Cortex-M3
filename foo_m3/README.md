@@ -1,6 +1,11 @@
 ## Mini Scheduler 
 - It is a timer based scheduler
 
+## Linker Script
+- When we don't mention any section for any function, by default compiler will consider it the text section
+
+<img width="1827" height="633" alt="image" src="https://github.com/user-attachments/assets/fd6b39f0-d4fc-4d2d-bdce-5493e73dadf2" />
+
 ```c++
 #include <limits.h>
 #include <stdint.h>
