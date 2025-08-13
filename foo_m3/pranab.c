@@ -12,8 +12,8 @@ void foo() {
         if (systick_ticks & 1) break;
     }
 }
-
-void myStartFunction() {
+__attribute__((section(".new_section1")))
+void myStartFunction() {  // 0x00000250
     int a = INT_MAX;
     while (a) {
         a--;
@@ -23,7 +23,8 @@ void myStartFunction() {
 }
 
 // SysTick handler (called from your assembly file)
-void SysTick_Handler5(void) {
+__attribute__((section(".new_section2")))
+void SysTick_Handler5(void) {   // 0x000002a8
     systick_ticks++;
     // Flip task every tick
     current_task ^= 1;
@@ -31,7 +32,8 @@ void SysTick_Handler5(void) {
 
 /// @brief
 /// @param
-void run_scheduler(void) {
+__attribute__((section(".new_section1")))
+void run_scheduler(void) {    // 0x00000288
     while (1) {
         if (current_task == 0) {
             foo();
