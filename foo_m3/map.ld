@@ -10,10 +10,13 @@ SECTIONS
 	.text : {
 		*(.vectors*)
 		*(.text*)
+		*(.new_section1)
+		*(.new_section2)
 		
 	} > MEM
 	
 	.data : {
 		*(.data*)
 	} > RAM
+
 }
