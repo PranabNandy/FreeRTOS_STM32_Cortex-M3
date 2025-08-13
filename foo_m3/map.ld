@@ -7,6 +7,7 @@ MEMORY
 
 SECTIONS
 {
+	/* Vector table & normal code in Flash */
 	.text : {
 		*(.vectors*)
 		*(.text*)
@@ -14,9 +15,24 @@ SECTIONS
 		*(.new_section2)
 		
 	} > MEM
-	
+	/* Variables in RAM */
 	.data : {
 		*(.data*)
 	} > RAM
 
+// ---------------------- My Special Code ----------------
+     /* Zero-initialized variables in RAM */
+    .bss :
+    {
+        *(.bss*)
+        *(COMMON)
+    } > RAM
+
+    /* Special section: functions to run from RAM */
+    .ramfunc :
+    {
+        *(.ramfunc)
+    } > RAM AT > FLASH
+
 }
+
