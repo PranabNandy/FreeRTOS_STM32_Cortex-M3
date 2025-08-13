@@ -4,6 +4,13 @@
 ## Linker Script
 - When we don't mention any section for any function, by default compiler will consider it the text section
 
+
+
+
+## ✅ Conclusion:
+- If you use **.ramfunc** and make sure your linker marks it as `EXEC`, GDB will recognize it and show foo() as expected.
+- If you just dump the code into **.data**, GDB won’t, because .data is never `EXEC`.
+
 <img width="1827" height="633" alt="image" src="https://github.com/user-attachments/assets/fd6b39f0-d4fc-4d2d-bdce-5493e73dadf2" />
 
 ```c++
