@@ -23,3 +23,8 @@
 # License
 
 All rights reserved. Only for learning purposes.
+
+## STM board
+Due to its fixed memory map, the **code area** starts from address `0x0000 0000` (accessed
+through the ICode/DCode buses) while the **data area (SRAM)** starts from address
+`0x2000 0000` (accessed through the system bus).
