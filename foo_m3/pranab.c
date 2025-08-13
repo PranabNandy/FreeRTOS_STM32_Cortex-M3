@@ -18,9 +18,6 @@ void Reset_Handler2(void) {
     src = &_si_ramfunc;
     for (dst = &_sramfunc; dst < &_eramfunc; )
         *dst++ = *src++;
-
-    // Call main
-    main();
 }
 
 //--------------------------------------------------------------
