@@ -4,6 +4,8 @@
 volatile uint32_t systick_ticks = 0;
 volatile uint8_t current_task = 0; // 0 = foo, 1 = myStartFunction
 
+
+//__attribute__((section(".data")))   --> Need to verify
 void foo() {
     int a = INT_MAX;
     while (a) {
