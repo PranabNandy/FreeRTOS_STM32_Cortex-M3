@@ -41,7 +41,7 @@ reset_handler:
 	
 	mov r5, #0
 	
-	b myStartFunction
+	b run_scheduler
 
 	.section .text
 	.align 1
@@ -73,5 +73,6 @@ systick_handler2:
 	bx lr
 
 	
+
 
 
