@@ -28,3 +28,13 @@ All rights reserved. Only for learning purposes.
 Due to its fixed memory map, the **code area** starts from address `0x0000 0000` (accessed
 through the ICode/DCode buses) while the **data area (SRAM)** starts from address
 `0x2000 0000` (accessed through the system bus).
+
+## stm32vldiscovery ( which uses an STM32F100RB )
+| Region           | Start Addr | Size   | Purpose                    |
+| ---------------- | ---------- | ------ | -------------------------- |
+| Flash            | 0x08000000 | 128 KB | Program code, constants    |
+| SRAM             | 0x20000000 | 8 KB   | Data, stack, heap          |
+| System Memory    | 0x1FFFF000 | 2 KB   | ST factory bootloader      |
+| Option Bytes     | 0x1FFFF800 | 16 B   | Configuration settings     |
+| Peripheral space | 0x40000000 | —      | Registers for peripherals  |
+| Cortex-M3 PPB    | 0xE0000000 | —      | NVIC, SysTick, debug, etc. |
