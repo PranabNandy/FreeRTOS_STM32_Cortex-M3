@@ -13,6 +13,20 @@
 
 <img width="1827" height="633" alt="image" src="https://github.com/user-attachments/assets/fd6b39f0-d4fc-4d2d-bdce-5493e73dadf2" />
 
+```ld
+.ramfunc :
+{
+
+} > RAM AT > MEM
+```
+
+| Attribute | Meaning                                                |
+| --------- | ------------------------------------------------------ |
+| **VMA**   | RAM — the section is linked to *execute* from RAM      |
+| **LMA**   | Flash — the section is *stored* in Flash in the binary |
+
+
+
 ```c++
 #include <limits.h>
 #include <stdint.h>
