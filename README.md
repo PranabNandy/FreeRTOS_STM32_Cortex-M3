@@ -38,3 +38,11 @@ through the ICode/DCode buses) while the **data area (SRAM)** starts from addres
 | Option Bytes     | 0x1FFFF800 | 16 B   | Configuration settings     |
 | Peripheral space | 0x40000000 | —      | Registers for peripherals  |
 | Cortex-M3 PPB    | 0xE0000000 | —      | NVIC, SysTick, debug, etc. |
+
+
+### What it is PPB (Private Pheripheral Bus)
+It’s a special memory region inside the ARM memory map.
+
+Used for core peripherals that are private to the CPU core (not the general microcontroller peripherals like GPIO, USART, etc.).
+
+These registers are always present in every Cortex-M3, regardless of the microcontroller vendor.
