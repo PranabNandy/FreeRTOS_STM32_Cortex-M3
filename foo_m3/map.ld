@@ -13,14 +13,14 @@ SECTIONS
 		*(.text*)
 		*(.new_section1)
 		*(.new_section2)
-		
+
 	} > MEM
 	/* Variables in RAM */
 	.data : {
 		*(.data*)
 	} > RAM
 
-// ---------------------- My Special Code ----------------
+/* ---------------------- My Special Code ----------------*/
      /* Zero-initialized variables in RAM */
     .bss :
     {
@@ -29,10 +29,16 @@ SECTIONS
     } > RAM
 
     /* Special section: functions to run from RAM */
-    .ramfunc :
-    {
-        *(.ramfunc)
-    } > RAM AT > FLASH
+	.ramfunc :
+	{
+	    _sramfunc = .;         /* VMA start of .ramfunc in RAM */
+	    *(.ramfunc)            /* Collect all functions marked __attribute__((section(".ramfunc"))) */
+	    _eramfunc = .;         /* VMA end of .ramfunc in RAM */
+	} > RAM AT > MEM
+
+	/* Load address (LMA) in Flash for copying at startup */
+	_si_ramfunc = LOADADDR(.ramfunc);
+	_ei_ramfunc = _si_ramfunc + SIZEOF(.ramfunc);
 
 }
 
