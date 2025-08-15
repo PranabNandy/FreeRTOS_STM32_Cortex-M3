@@ -21,7 +21,7 @@
 .word 0 /* BusFault */
 .word 0 /* UsageFault */
 .word 0,0,0,0
-.word 0 /* SVC */
+.word 0 /* SVC */     --> if we execute instruction "SVC #0", then it will come to this handler
 .word 0 /* DebugMon */
 .word 0
 .word 0 /* PendSV */
