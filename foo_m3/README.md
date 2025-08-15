@@ -2,8 +2,31 @@
 - It is a timer based scheduler
 
 ## Linker Script
-- When we don't mention any section for any function, by default compiler will consider it the text section
+- When we don't mention any section for any function, by default compiler will consider it the **text section**
 
+```ASM
+ /* ======================= VECTOR TABLE ======================= */
+.section .vectors, "a", %progbits
+.align 2
+.global __stack_top
+.global Reset_Handler
+
+/* Initial stack pointer (top of RAM) and handlers.
+   Use +1 to set Thumb bit in the vector entries. */
+.word __stack_top
+.word Reset_Handler+1
+.word 0 /* NMI */
+.word 0 /* HardFault */
+.word 0 /* MemManage */
+.word 0 /* BusFault */
+.word 0 /* UsageFault */
+.word 0,0,0,0
+.word 0 /* SVC */
+.word 0 /* DebugMon */
+.word 0
+.word 0 /* PendSV */
+.word SysTick_Handler+1 /* SysTick */
+```
 
 
 
