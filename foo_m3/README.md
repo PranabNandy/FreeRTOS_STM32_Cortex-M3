@@ -14,6 +14,14 @@
 <img width="1827" height="633" alt="image" src="https://github.com/user-attachments/assets/fd6b39f0-d4fc-4d2d-bdce-5493e73dadf2" />
 
 ```ld
+.data : AT (LOADADDR(.text) + SIZEOF(.text) + SIZEOF(.ramfunc))
+    {
+        _sdata = .;
+        *(.data*)
+        _edata = .;
+    } > RAM
+    _sidata = LOADADDR(.data);
+
 .ramfunc :
 {
 
@@ -25,7 +33,16 @@
 | **VMA**   | RAM — the section is linked to *execute* from RAM      |
 | **LMA**   | Flash — the section is *stored* in Flash in the binary |
 
+```ld
+LMA(.data) = LMA(.text) + size_of(.text) + size_of(.ramfunc)
+```
+That means:
 
+Flash layout: `[ .text ][ .ramfunc ][ .data_init_values ] ... `
+
+RAM layout (at runtime): `[ .ramfunc (copied from Flash) ][ .data (copied from Flash) ] `
+
+In the above LD script, we have to copy .data section from **LMA to VMA.**
 
 ```c++
 #include <limits.h>
