@@ -28,7 +28,12 @@
 .word SysTick_Handler+1 /* SysTick */
 ```
 
+### Practical Notes for Cortex-M3
+For code: `.align 1` is usually enough — ensures Thumb fetches are legal. // **2B bytes Instruction**
 
+Aligns the next label to a 2-byte boundary.
+
+For data: you might use `.align 2` for uint32_t arrays, .align 3 for uint64_t. // **4B bytes Instruction**
 
 ## ✅ Conclusion:
 - If you use **.ramfunc** and make sure your linker marks it as `EXEC`, GDB will recognize it and show foo() as expected.
