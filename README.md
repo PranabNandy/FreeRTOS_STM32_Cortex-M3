@@ -51,3 +51,7 @@ These registers are always present in every Cortex-M3, regardless of the microco
 ### Peripherals are also important
 
 - MMU, GIC, Timers, Caches, Synchronization, Interconnect ( Coherent{AXI,ACE} & Non-coherent )
+
+### Bus Protocol & Cache Coherent Interconnect
+
+- ACE, AXI
