@@ -47,3 +47,7 @@ It’s a special memory region inside the ARM memory map.
 Used for **core peripherals that are private to the CPU core** (not the general microcontroller peripherals like GPIO, USART, etc.).
 
 These registers are always present in every Cortex-M3, regardless of the microcontroller vendor.
+
+### Peripherals are also important
+
+- MMU, GIC, Timers, Caches, Synchronization, Interconnect ( Coherent{AXI,ACE} & Non-coherent )
