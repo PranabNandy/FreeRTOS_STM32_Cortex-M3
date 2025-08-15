@@ -43,6 +43,6 @@ through the ICode/DCode buses) while the **data area (SRAM)** starts from addres
 ### What it is PPB (Private Pheripheral Bus)
 It’s a special memory region inside the ARM memory map.
 
-Used for core peripherals that are private to the CPU core (not the general microcontroller peripherals like GPIO, USART, etc.).
+Used for **core peripherals that are private to the CPU core** (not the general microcontroller peripherals like GPIO, USART, etc.).
 
 These registers are always present in every Cortex-M3, regardless of the microcontroller vendor.
