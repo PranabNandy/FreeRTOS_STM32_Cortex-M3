@@ -68,6 +68,58 @@ The vector table must be aligned to a 2KB boundary (hence .align 11). Each entry
 128 bytes, allowing for small handlers or branches to larger ones. For our system
 call, the processor jumps to sync_lower_el.
 
+## Context Switching
+In EL1, the kernel saves the EL0 context (general-purpose registers, etc.) to
+ensure the user program can resume. On return, it restores the context before
+**eret.**
+
+```ASM
+Context save/restore sub-routines:
+// context save in EL1
+save_context:
+    sub sp, sp, #256 // allocate space for context
+    stp x0, x1, [sp, #16 * 0] // save x0, x1
+    stp x2, x3, [sp, #16 * 1] // save x2, x3
+    stp x4, x5, [sp, #16 * 2]
+    stp x6, x7, [sp, #16 * 3]
+    stp x8, x9, [sp, #16 * 4]
+    stp x10, x11, [sp, #16 * 5]
+    stp x12, x13, [sp, #16 * 6]
+    stp x14, x15, [sp, #16 * 7]
+    stp x16, x17, [sp, #16 * 8]
+    stp x18, x19, [sp, #16 * 9]
+    stp x20, x21, [sp, #16 * 10]
+    stp x22, x23, [sp, #16 * 11]
+    stp x24, x25, [sp, #16 * 12]
+    stp x26, x27, [sp, #16 * 13]
+    stp x28, x29, [sp, #16 * 14]
+    stp x30, xzr, [sp, #16 * 15] // save x30, pad with zero
+    ret
+
+
+// context restore in EL1
+restore_context:
+    ldp x0, x1, [sp, #16 * 0] // restore x0, x1
+    ldp x2, x3, [sp, #16 * 1] // restore x2, x3
+    ldp x4, x5, [sp, #16 * 2]
+    ldp x6, x7, [sp, #16 * 3]
+    ldp x8, x9, [sp, #16 * 4]
+    ldp x10, x11, [sp, #16 * 5]
+    ldp x12, x13, [sp, #16 * 6]
+    ldp x14, x15, [sp, #16 * 7]
+    ldp x16, x17, [sp, #16 * 8]
+    ldp x18, x19, [sp, #16 * 9]
+    ldp x20, x21, [sp, #16 * 10]
+    ldp x22, x23, [sp, #16 * 11]
+    ldp x24, x25, [sp, #16 * 12]
+    ldp x26, x27, [sp, #16 * 13]
+    ldp x28, x29, [sp, #16 * 14]
+    ldp x30, xzr, [sp, #16 * 15]
+    add sp, sp, #256 // free up the space (remember we allocated this in save_context)
+    ret
+```
+
+
 
 
 
