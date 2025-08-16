@@ -227,6 +227,33 @@ that switch from NS to S world.
     // Set elr_el3 correspondingly
     eret // Control would be transferred to secure world post the exception return
 ```
+
+
+-----------------------------------------------------------------------------------------------------
+# 3rd pdf
+## 1. Vector Table
+When an interrupt occurs, the ARM processor performs a semi hardware-assisted
+exception handling (What do I mean by semi-assisted, we will find answer real
+soon).
+
+For synchronous exceptions (like data aborts) or asynchronous exceptions (like
+IRQs and FIQs) taken from `EL0`, the processor jumps to an entry point specified in
+the **Vector Base Address Register (`VBAR_EL1`).**
+
+
+Each exception level (`EL1, EL2, EL3`) has its own `VBAR`. When an exception is taken,
+the processor determines the target exception level (which is EL1 if we’re coming
+from EL0) and uses that EL’s VBAR (i.e EL1 VBAR) to locate the vector table. The vector table
+contains addresses of the exception handlers.
+
+**NOTE:** While we are executing at EL0, any interrupt will be taken to EL1. This
+is a fundamental concept in ARMv8-A exception handling. We can’t directly handle
+interrupts at EL0; the architecture mandates a transition to a higher exception
+level (typically EL1) to handle them. IRQs/FIQs and other exceptions are deemed
+crucial enough to not be handled at EL0 user space.
+
+
+-----------------------------------------------------------------------------------------------------
 ## Raspberry Pi 4 Model B Boot Sequence
 
 ### 1.Power-On and Initial Hardware Initialization
