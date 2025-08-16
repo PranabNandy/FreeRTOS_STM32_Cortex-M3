@@ -291,6 +291,10 @@ interrupts.
 
 ## 3. GIC and CPU Interface’s Interaction
 
+It’s a separate `hardware block` responsible for aggregating
+interrupt sources, prioritizing them, and presenting them to the ARM core. The CPU
+interface is the part of the GIC that directly communicates with the ARM processor.
+
 
 
 
