@@ -77,3 +77,12 @@ based on configuration.
 the network.
 - EEPROM Updates: The Boot EEPROM stores bootcode.bin and can be updated to modify
 boot behavior.
+
+
+### Notes
+- The VideoCore IV GPU handles early boot stages before the ARM CPU is activated.
+= config.txt allows customization (e.g., overclocking, kernel selection).
+- Boot failures are indicated by specific green LED blink patterns (e.g., 4
+blinks for “start.elf not found”).
+- Supports 32-bit and 64-bit OS, determined by the kernel image.
+- **start.elf/start4.elf:** GPU firmware for hardware setup and kernel loading.
