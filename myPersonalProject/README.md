@@ -4,6 +4,7 @@ Then we try to multiple function call from reset_handler
 
 -----------------------------------------------------------------------------------------------------
 # 1st pdf
+<img width="1195" height="720" alt="image" src="https://github.com/user-attachments/assets/c1f8e97a-b94b-433d-b805-5bf946803f82" />
 
 ## Triggering the System Call from EL0
 ```ASM
