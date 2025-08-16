@@ -201,8 +201,32 @@ hvc_handler:
 return_to_el1:
     eret // Return to EL1 (we will also have to modify spsr, we will cover in detail in next
 ```
+## EL3: The Secure Monitor
+```ASM
+// Vector table entry for synchronous exception at EL3
+sync_exception_entry:
+    mrs x9, esr_el3 // Read Exception Syndrome Register
+    and x10, x9, #0x3F // Extract exception class
+    cmp x10, #0x17 // Check whether it was secure monitor call (0x17 is the value for smc from EL1/b.eq smc_handler
+    // Code for handling other sync exceptions
+smc_hanlder:
+    // Based on the request ID, decide whether switch to secure world is needed or not
+    // If needed modify SCR_EL3 appropriately and then return
+    eret
+```
 
 
+The secure monitor (EL3) acts as a gatekeeper, using the **`scr_el3 (Secure Configuration Register)`** to control and switch between the two worlds. The snippet shows
+that switch from NS to S world.
+```ASM
+    // scr_el3 to switch to secure world
+    mrs x0, scr_el3
+    orr x0, x0, #1 // Set NS bit to 0 (Secure world)
+    msr scr_el3, x0
+    isb
+    // Set elr_el3 correspondingly
+    eret // Control would be transferred to secure world post the exception return
+```
 ## Raspberry Pi 4 Model B Boot Sequence
 
 ### 1.Power-On and Initial Hardware Initialization
