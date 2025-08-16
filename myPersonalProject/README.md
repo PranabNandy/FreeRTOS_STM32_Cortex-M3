@@ -253,6 +253,36 @@ level (typically EL1) to handle them. IRQs/FIQs and other exceptions are deemed
 crucial enough to not be handled at EL0 user space.
 
 
+```ASM
+// EL1 Vector Table
+.align 11 // Vector table must be 2KB aligned (2^11)
+el1_vector_table: // This address will be loaded in VBAR_EL1 during boot time
+    // ... other exception entries ...
+    // EL1_SYNC: Synchronous exception from EL0 (At offset 0x400)
+    b el1_sync_handler
+    // EL1_IRQ: IRQ from EL0 (At offset 0x480)
+    b el1_irq_handler // This is where our IRQ handling journey begins!
+    // EL1_FIQ: FIQ from EL0 (At offset 0x500)
+    b el1_fiq_handler
+    // EL1_SERROR: SError from EL0 (At offset 0x580)
+    b el1_serror_handler
+    // ... other exception entries ...
+el1_irq_handler:
+    // This is our main IRQ handler entry point
+    // We'll dive into the details of this handler shortly
+    // We will cover the full vector table structure in some other posts
+    b .
+```
+
+
+
+
+
+
+
+
+
+
 -----------------------------------------------------------------------------------------------------
 ## Raspberry Pi 4 Model B Boot Sequence
 
