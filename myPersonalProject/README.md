@@ -166,6 +166,42 @@ The **eret instruction** restores PC from ELR_EL1 and state from SPSR_EL1.
 -----------------------------------------------------------------------------------------------------
 # 2nd pdf
 
+## EL0 : User Application
+**EL0 code can’t even touch the memory management unit (MMU)** configuration. The
+page tables it uses are set up **by EL1 (the OS)**, and EL0 has to trust them
+blindly. This isolation is great for security as third-party code should
+seldom be trusted.
+
+## EL1: The OS / Kernel Layer
+It’s got way more power than EL0, with direct access to **hardware resources like the MMU,**
+interrupts, and most system registers.
+
+## EL2: Hypervisor - (I like to think of it as Scheduler for Kernels/VMs)
+```ASM
+// Vector table entry for synchronous exception of EL2
+sync_exception_entry:
+    // ESR_EL2 contains the exception cause details
+    mrs x0, esr_el2 // Exception Syndrome Register
+    ubfx x1, x0, #0, #26 // Extract syndrome
+    ubfx x2, x0, #26, #6 // Extract exception class (EC)
+    cmp x2, #0x16 // Check whether it was hypervisor call (0x16 is the value for hvc from EL1)
+    b.eq hvc_handler
+    // Code for handling other sync exceptions
+
+
+hvc_handler:
+    // Read HVC immediate value (passed via hvc #imm_id)
+    ubfx x3, x1, #0, #16 // Extract immediate value from ISS
+    // E.g. Handle specific HVC call (e.g., imm_id == 0x1 for guest info request)
+    cmp x3, #0x1
+    b.eq hadnle_guest_info
+    // Handling of other HVC imm_ids
+    ...
+    ...
+return_to_el1:
+    eret // Return to EL1 (we will also have to modify spsr, we will cover in detail in next
+```
+
 
 ## Raspberry Pi 4 Model B Boot Sequence
 
