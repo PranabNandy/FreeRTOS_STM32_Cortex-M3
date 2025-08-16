@@ -2,6 +2,33 @@ This contains only basic Cortex-M3 demo where we set up stack and vector table s
 
 Then we try to multiple function call from reset_handler
 
+-----------------------------------------------------------------------------------------------------
+## Triggering the System Call from EL0
+```ASM
+// user program in EL0 making a system call (e.g., write syscall)
+mov x8, #64 // syscall number for write (Linux ARM64)
+mov x0, #1 // file descriptor (stdout = 1)
+adr x1, print_msg // pointer to message
+mov x2, #12 // length of message
+
+svc #0 // trigger system call to EL1
+print_msg:
+    .asciz "Hey from EL0, this message is for EL1\n"
+
+```
+- I load the system call number (64 for write in Linux ARM64)
+into x8, set up arguments in x0–x2 (per the Linux ABI), and issue svc #0.
+
+- The
+immediate value (#0) is mostly ignored in practice but can be used by the kernel
+to differentiate types of supervisor calls.
+- When svc executes, the processor **(automatically happens in h/w, no s/w intervention is required)**:
+  - Switches to EL1.
+  - Saves the program counter `(PC)` to `ELR_EL1` (Exception Link Register for EL1)
+  - Saves the status register `(PSTATE)` to `SPSR_EL1` (Saved Program Status Register
+for EL1)
+   - Jumps to the vector table entry for synchronous exceptions.
+
 ## Raspberry Pi 4 Model B Boot Sequence
 
 ### 1.Power-On and Initial Hardware Initialization
@@ -81,7 +108,7 @@ boot behavior.
 
 ### Notes
 - The VideoCore IV GPU handles early boot stages before the ARM CPU is activated.
-= config.txt allows customization (e.g., overclocking, kernel selection).
+- config.txt allows customization (e.g., overclocking, kernel selection).
 - Boot failures are indicated by specific green LED blink patterns (e.g., 4
 blinks for “start.elf not found”).
 - Supports 32-bit and 64-bit OS, determined by the kernel image.
