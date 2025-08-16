@@ -125,6 +125,12 @@ restore_context:
 
 
 
+
+
+
+
+
+
 ## Raspberry Pi 4 Model B Boot Sequence
 
 ### 1.Power-On and Initial Hardware Initialization
