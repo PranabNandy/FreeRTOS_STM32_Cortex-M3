@@ -19,8 +19,7 @@ print_msg:
 - I load the system call number (64 for write in Linux ARM64)
 into x8, set up arguments in x0–x2 (per the Linux ABI), and issue svc #0.
 
-- The
-immediate value (#0) is mostly ignored in practice but can be used by the kernel
+- The immediate value (#0) is mostly ignored in practice but can be used by the kernel
 to differentiate types of supervisor calls.
 - When svc executes, the processor **(automatically happens in h/w, no s/w intervention is required)**:
   - Switches to EL1.
@@ -28,6 +27,51 @@ to differentiate types of supervisor calls.
   - Saves the status register `(PSTATE)` to `SPSR_EL1` (Saved Program Status Register
 for EL1)
    - Jumps to the vector table entry for synchronous exceptions.
+
+Note: The svc instruction doesn’t save general-purpose registers (x0–x30). That’s
+on the kernel to handle, or you risk clobbering user state.
+
+## The Vector Table and Synchronous Exception Handling
+When the svc instruction fires, the processor looks at the Vector Base Address
+Register (VBAR_EL1). For a 64-bit EL0 app, the processor jumps to the “Synchronous, Lower EL, AArch64”
+entry.
+```ASM
+// vector table in EL1
+.align 11 // align to 2KB boundary (ARMv8a architecture requirement)
+vector_table:
+    // synchronous exception from current EL with SP0
+    b sync_handler
+    .align 7 // each entry is 128 bytes (ARMv8a architecture requirement)
+    // other entries (interrupts, FIQ, etc.)
+    b .
+    .align 7
+    b .
+    .align 7
+    b .
+    .align 7
+    // synchronous exception from lower EL (EL0, AArch64)
+    b sync_lower_el
+
+sync_handler:
+// handle synchronous exceptions (e.g., svc from EL1)
+    b .
+
+sync_lower_el:
+    // save context, parse the ESR, handle syscall, restore the context, return to EL0
+    bl save_context // save registers (Explained in detail in the next section)
+    bl parse_and_handle_syscall // call syscall handler (Explained in detail in the next section)
+    bl restore_context // restore the registers (Explained in detail in the next section)
+    eret // return to EL0
+
+```
+The vector table must be aligned to a 2KB boundary (hence .align 11). Each entry is
+128 bytes, allowing for small handlers or branches to larger ones. For our system
+call, the processor jumps to sync_lower_el.
+
+
+
+
+
 
 ## Raspberry Pi 4 Model B Boot Sequence
 
