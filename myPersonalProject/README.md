@@ -3,6 +3,8 @@ This contains only basic Cortex-M3 demo where we set up stack and vector table s
 Then we try to multiple function call from reset_handler
 
 -----------------------------------------------------------------------------------------------------
+# 1st pdf
+
 ## Triggering the System Call from EL0
 ```ASM
 // user program in EL0 making a system call (e.g., write syscall)
@@ -119,16 +121,49 @@ restore_context:
     ret
 ```
 
+## Parsing ESR_EL1
+The `Exception Syndrome Register (ESR_EL1)` identifies the exception cause. Remember,
+**h/w will only be able to identify that a synchronous exception from lower EL and
+the control would be transferred to the appropriate entry in vector table which
+is sync_lower_el.** We will have to identify if it is indeed a svc call or not, and
+for that, we will have to decode the exception syndrome register.
+For a system call, it confirms an svc instruction and provides details.
 
 
+```ASM
+// Parse annd handle syscalls
+parse_and_handle_syscall:
+    // parse ESR_EL1 to identify exception type and handle them accordingly
+    mrs x0, esr_el1 // read ESR_EL1
+    ubfx x1, x0, #26, #6 // extract Exception Class bits - BITs 31:26
+    cmp x1, #0x15 // EC for SVC from AArch64 = 0x15
+    b.eq handle_svc // branch to SVC handler (at this point we have with certainity figured it's // handle other exceptions
+    b other_exception
+handle_svc:
+    ubfx x2, x0, #0, #16 // extract ISS (Instruction Specific Syndrome)
+    // x2 contains SVC immediate
+    ret
+other_exception:
+    // handle other cases
+    b .
 
+```
 
+## ELR_EL1 and Returning to EL0
 
-
-
-
-
-
+ELR_EL1 holds the return address (usually the instruction after svc). The kernel
+can modify it for special cases.
+```ASM
+// prepare to return to EL0
+return_to_el0:
+    // ELR_EL1 holds return address
+    // SPSR_EL1 holds saved PSTATE
+    bl restore_context
+    eret // return to EL0
+```
+The **eret instruction** restores PC from ELR_EL1 and state from SPSR_EL1.
+-----------------------------------------------------------------------------------------------------
+# 2nd pdf
 
 
 ## Raspberry Pi 4 Model B Boot Sequence
