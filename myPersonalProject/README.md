@@ -274,8 +274,22 @@ el1_irq_handler:
     b .
 ```
 
+## 2. Are Interrupts Masked by default in an interrupt context?
+
+To answer it shortly, **Yes,** when an exception is taken, the hardware automatically
+**masks** asynchronous exceptions (IRQs and FIQs) at the target exception level.
+
+Specifically, upon entering an exception handler at EL1 (from EL0), the `PSTATE.I`
+(IRQ mask bit) and `PSTATE.F` (FIQ mask bit) bits are set to 1, effectively disabling
+further IRQs and FIQs. This prevents immediate re-entry into an interrupt handler
+before the current one has had a chance to save its context or establish its own
+interrupt handling policy.
+
+We can re-enable interrupts within our handler if we intend to support nested
+interrupts.
 
 
+## 3. GIC and CPU Interface’s Interaction
 
 
 
