@@ -1,215 +1,240 @@
-1. What is an SoC?
-A System on Chip (SoC) is an integrated circuit that consolidates multiple components of a computer or electronic system onto a single chip. Unlike traditional systems where the CPU, memory, and peripherals are separate entities connected via a motherboard, an SoC integrates these into a compact, power-efficient package. 
-Key Components of an SoC:
-CPU (Central Processing Unit): The brain of the system, executing instructions. In modern SoCs, this is often a multi-core processor (e.g., ARM Cortex-A series in AArch64).
-
-GPU (Graphics Processing Unit): Handles graphics rendering, often critical for embedded systems with displays.
-
-Memory: On-chip RAM, caches, or interfaces to external memory (e.g., DDR RAM).
-
-Peripherals: Includes GPIO (General Purpose Input/Output), UART (serial communication), I2C, SPI, USB controllers, etc.
-
-Interconnect: Buses like AMBA (Advanced Microcontroller Bus Architecture) to link components.
-
-Power Management Unit (PMU): Controls power states for efficiency.
-
-Why SoCs Matter in Embedded Systems:
-Compact size and low power consumption make them ideal for devices like smartphones, IoT gadgets, and the Raspberry Pi.
-
-Cost-effective for mass production.
-
-Highly customizable for specific applications (e.g., automotive, medical devices).
-
-Example: The Raspberry Pi 4’s Broadcom BCM2711 SoC integrates a quad-core ARM Cortex-A72 CPU, a VideoCore VI GPU, and various peripherals, all tailored for a single-board computer.
-
-2. AArch64 Architecture and Relevance
-AArch64 is the 64-bit execution state of the ARMv8-A architecture, developed by ARM Holdings. It’s widely used in modern embedded systems, servers, and mobile devices due to its efficiency and scalability.
-Key Features of AArch64:
-64-bit Registers: 31 general-purpose registers (X0-X30), each 64 bits wide, plus a stack pointer (SP) and program counter (PC).
-
-Instruction Set: AArch64 uses a RISC (Reduced Instruction Set Computer) design, offering simplicity and power efficiency.
-
-Memory Addressing: Supports up to 48-bit virtual addresses (extendable to 52-bit in some implementations), allowing access to large memory spaces.
-
-Exception Levels (EL0-EL3): Defines privilege levels:
-EL0: User applications.
-
-EL1: Operating system kernel.
-
-EL2: Hypervisor.
-
-EL3: Secure monitor (e.g., firmware or bootloader).
-
-Advanced SIMD (NEON): For parallel processing, useful in multimedia and signal processing.
-
-Relevance to Embedded Systems:
-Power efficiency suits battery-powered devices.
-
-Scalability from low-end IoT to high-performance systems like the Raspberry Pi 4.
-
-Open ecosystem with extensive toolchain support (e.g., GCC, LLVM).
-
-Raspberry Pi 4 Context: The BCM2711 SoC uses four Cortex-A72 cores running in AArch64 mode, making it a perfect platform to explore this architecture.
-
-3. General Boot Sequence (Stages, Power On, etc.)
-The boot sequence of an embedded system with an SoC is the process from power-on to handing control to an operating system or application. It involves multiple stages, each handled by specific hardware or firmware.
-Stage 1: Power-On Reset (POR):
-When power is applied, the SoC’s reset circuitry initializes the CPU and other components to a known state.
-
-Clocks and voltage regulators stabilize.
-
-Stage 2: On-Chip Boot ROM:
-The CPU starts executing code from a hardwired Boot ROM (read-only memory) inside the SoC.
-
-This code is minimal, typically loading a bootloader from a predefined location (e.g., flash memory, SD card).
-
-Configures basic hardware like memory controllers.
-
-Stage 3: First-Stage Bootloader (FSBL):
-Loaded from external storage (e.g., NAND, NOR flash, or SD card).
-
-Initializes critical peripherals (e.g., DRAM) and sets up a minimal execution environment.
-
-Often proprietary or SoC-specific (e.g., Broadcom’s bootcode.bin for Raspberry Pi).
-
-Stage 4: Second-Stage Bootloader (SSBL):
-More sophisticated, like U-Boot or a custom loader.
-
-Configures additional peripherals, loads the kernel into memory, and passes control to it.
-
-Stage 5: Kernel/OS Initialization:
-The operating system (e.g., Linux) takes over, initializing drivers and user space.
-
-Key Insight: Each stage builds on the previous one, progressively enabling more hardware features. Understanding this flow is crucial for bare-metal programming, as you’ll often work at the FSBL or SSBL level.
-
-4. Raspberry Pi 4 - Boot Sequence
-The Raspberry Pi 4’s boot process is unique due to its Broadcom BCM2711 SoC and reliance on an SD card. Here’s how it unfolds:
-Step 1: Power-On and GPU Boot:
-The VideoCore IV GPU (not the ARM CPU) boots first from an on-chip Boot ROM.
-
-The Boot ROM looks for bootcode.bin on the SD card’s first partition (FAT32).
-
-bootcode.bin is loaded into the GPU’s L2 cache and executed.
-
-Step 2: GPU Loads Firmware:
-bootcode.bin loads start.elf (the GPU firmware) into RAM.
-
-start.elf initializes the DRAM and loads configuration from config.txt (e.g., overclocking, display settings).
-
-Step 3: ARM CPU Activation:
-Once the GPU sets up the system, it loads the ARM kernel image (e.g., kernel8.img for AArch64) into RAM.
-
-The GPU releases the ARM Cortex-A72 cores from reset, and they begin executing at address 0x80000.
-
-Step 4: Kernel Execution:
-The ARM CPU runs the Linux kernel or bare-metal code, depending on what was loaded.
-
-Notable Nugget: The GPU’s dominance in the boot process is unusual compared to typical SoCs, where the CPU boots first. This reflects the Raspberry Pi’s origins as a graphics-focused educational tool.
-
-5. SoC Datasheet and the Concept of Memory-Mapped I/O
-The SoC datasheet is the definitive reference for understanding its hardware. For the BCM2711 (Raspberry Pi 4), Broadcom provides limited public documentation, but key concepts like memory-mapped I/O are universal.
-What’s in a Datasheet?
-Register addresses for peripherals (e.g., GPIO, UART).
-
-Memory map detailing where RAM, ROM, and peripherals reside.
-
-Pin multiplexing options and electrical characteristics.
-
-Memory-Mapped I/O (MMIO):
-Peripherals are controlled by reading/writing to specific memory addresses rather than using dedicated I/O instructions.
-
-Example: Writing to address 0x3F200000 on the BCM2711 toggles a GPIO pin.
-
-The CPU sees these addresses as part of its memory space, mapped via the SoC’s interconnect.
-
-Practical Insight: MMIO requires precise knowledge of register layouts from the datasheet. Misaligned or incorrect writes can crash the system, making datasheet study essential for bare-metal coding.
-
-6. Peripherals - GPIO, UART, Interrupts
-Peripherals extend the SoC’s functionality. Here’s a breakdown of key ones:
-GPIO (General Purpose Input/Output):
-Pins configurable as inputs or outputs for interfacing with LEDs, buttons, sensors, etc.
-
-Controlled via MMIO registers (e.g., set, clear, or read state).
-
-Example: Raspberry Pi 4 has 28 GPIO pins on its 40-pin header.
-
-UART (Universal Asynchronous Receiver/Transmitter):
-Serial communication interface for debugging or device interaction.
-
-On Raspberry Pi 4, the PL011 UART is mapped at 0x3F201000.
-
-Requires baud rate, parity, and data bit configuration.
-
-Interrupts:
-Hardware signals that interrupt the CPU to handle urgent events (e.g., button press, timer expiry).
-
-Managed via an interrupt controller (e.g., GIC-400 in AArch64 SoCs).
-
-Critical for responsive bare-metal systems.
-
-Nugget: Misconfiguring interrupts can lead to “interrupt storms,” overwhelming the CPU. Always disable unused interrupts during initialization.
-
-7. What is a Hardware Debugger and Why Needed?
-A hardware debugger is a tool that interfaces with the SoC’s debug port (e.g., JTAG or SWD) to monitor and control execution.
-Functions:
-Set breakpoints, step through code, inspect registers/memory.
-
-Load code directly into RAM or flash.
-
-Diagnose crashes or hangs.
-
-Why Needed?
-Bare-metal code lacks an OS to provide error messages or logs.
-
-Hardware issues (e.g., misconfigured MMIO) are hard to trace without direct access to the CPU state.
-
-Example: Using a JTAG debugger with OpenOCD on Raspberry Pi 4 to debug boot code.
-
-Insight: Software debugging (e.g., print statements) is slow and limited in bare-metal contexts—hardware debuggers are a game-changer.
-
-8. Writing Bare-Metal Code
-Bare-metal code runs directly on the hardware without an OS, giving full control but requiring manual management of everything.
-Steps:
-Setup Toolchain: Use an AArch64 cross-compiler (e.g., aarch64-none-elf-gcc).
-
-Linker Script: Define memory layout (e.g., where code, data, and stack reside).
-
-Initialization: Configure clocks, memory, and peripherals via MMIO.
-
-Main Loop: Implement logic (e.g., blink an LED using GPIO).
-
-Example (Pseudo-Code):
-
-```
-#define GPIO_BASE 0x3F200000
-#define GPFSEL1   (GPIO_BASE + 0x04)
-void main() {
-    *(volatile uint32_t*)GPFSEL1 = (1 << 3); // Set GPIO 11 as output
-    while (1) {
-        // Toggle GPIO 11
-    }
-}
+## 1. Vector Table
+When an interrupt occurs, the ARM processor performs a semi hardware-assisted
+exception handling (What do I mean by semi-assisted, we will find answer real
+soon).
+
+For synchronous exceptions (like data aborts) or asynchronous exceptions (like
+IRQs and FIQs) taken from `EL0`, the processor jumps to an entry point specified in
+the **Vector Base Address Register (`VBAR_EL1`).**
+
+
+Each exception level (`EL1, EL2, EL3`) has its own `VBAR`. When an exception is taken,
+the processor determines the target exception level (which is EL1 if we’re coming
+from EL0) and uses that EL’s VBAR (i.e EL1 VBAR) to locate the vector table. The vector table
+contains addresses of the exception handlers.
+
+**NOTE:** While we are executing at EL0, any interrupt will be taken to EL1. This
+is a fundamental concept in ARMv8-A exception handling. We can’t directly handle
+interrupts at EL0; the architecture mandates a transition to a higher exception
+level (typically EL1) to handle them. IRQs/FIQs and other exceptions are deemed
+crucial enough to not be handled at EL0 user space.
+
+
+```ASM
+// EL1 Vector Table
+.align 11 // Vector table must be 2KB aligned (2^11)
+el1_vector_table: // This address will be loaded in VBAR_EL1 during boot time
+    // ... other exception entries ...
+    // EL1_SYNC: Synchronous exception from EL0 (At offset 0x400)
+    b el1_sync_handler
+    // EL1_IRQ: IRQ from EL0 (At offset 0x480)
+    b el1_irq_handler // This is where our IRQ handling journey begins!
+    // EL1_FIQ: FIQ from EL0 (At offset 0x500)
+    b el1_fiq_handler
+    // EL1_SERROR: SError from EL0 (At offset 0x580)
+    b el1_serror_handler
+    // ... other exception entries ...
+el1_irq_handler:
+    // This is our main IRQ handler entry point
+    // We'll dive into the details of this handler shortly
+    // We will cover the full vector table structure in some other posts
+    b .
 ```
 
-Nugget: Align code entry points (e.g., 0x80000 for Raspberry Pi) and ensure stack setup, or the CPU will fault immediately.
+## 2. Are Interrupts Masked by default in an interrupt context?
 
-9. Debugging Using Hardware Debugger
-Setup: Connect a JTAG/SWD debugger (e.g., Segger J-Link) to the Raspberry Pi 4’s debug pins (if exposed) and use software like OpenOCD or GDB.
+To answer it shortly, **Yes,** when an exception is taken, the hardware automatically
+**masks** asynchronous exceptions (IRQs and FIQs) at the target exception level.
 
-Process:
-Load the binary into RAM via the debugger.
+Specifically, upon entering an exception handler at EL1 (from EL0), the `PSTATE.I`
+(IRQ mask bit) and `PSTATE.F` (FIQ mask bit) bits are set to 1, effectively disabling
+further IRQs and FIQs. This prevents immediate re-entry into an interrupt handler
+before the current one has had a chance to save its context or establish its own
+interrupt handling policy.
 
-Set a breakpoint at main().
-
-Step through, inspecting registers (e.g., X0, PC) and memory.
-
-Check peripheral states (e.g., GPIO registers).
-
-Common Issues:
-Incorrect memory access (e.g., uninitialized DRAM).
-
-Interrupt misconfiguration causing hangs.
-
-Insight: Use the debugger to verify every hardware interaction—assumptions about timing or state can lead to subtle bugs.
+We can re-enable interrupts within our handler if we intend to support nested
+interrupts.
 
 
+## 3. GIC and CPU Interface’s Interaction
+
+It’s a separate `hardware block` responsible for aggregating
+interrupt sources, prioritizing them, and presenting them to the ARM core. The CPU
+interface is the part of the GIC that directly communicates with the ARM processor.
+
+
+
+Macro level view of its working:
+- **1. Interrupt Source:** An external peripheral (e.g., `a timer, a network controller,
+a GPIO pin`) asserts its interrupt line.
+- **2. GIC Distributor:** The GIC Distributor collects these interrupt requests, manages
+their priority, and determines which core (in an SMP system) should
+receive the interrupt.
+- **3. GIC CPU Interface:** The GIC CPU Interface then signals the ARM core that an
+interrupt is pending. This is what causes the ARM processor to take the
+exception and jump to our `el1_irq_handler.`
+
+To identify which interrupt has occurred and to acknowledge it, our CPU will
+interact with the GIC CPU Interface registers. These registers are memory-mapped,
+meaning we access them by reading from and writing to specific memory addresses.
+
+
+## 4. Interrupt handling flow
+
+Let’s looks at a typical generic interrupt handler at EL1. I would also encourage
+folks to take a look at other kernel implementation and compare how there handling
+logic is written.
+- **1. Save Context:** Preserve the state of the interrupted EL0 program. This includes
+general-purpose registers (X0-X30), floating point registers, and possibly
+some other peripheral registers whose state might be cobbled by EL1.
+
+  `NOTE:` The stack pointer (SP_EL0), and the Exception Link Register (ELR_EL1) and
+Saved Program Status Register (SPSR_EL1) are automatically saved by hardware
+on exception entry.
+- **2. Identify Interrupt Source:** Read a GIC CPU Interface register to determine the
+Interrupt ID (INTID) of the pending interrupt. (Detailed below)
+- **3. Acknowledge Interrupt:** Write to a GIC CPU Interface register to acknowledge
+that the interrupt has been received by the CPU. This prevents the GIC from
+re-signaling the same interrupt. (Detauled below)
+- **4. Enable Interrupts** (Optional, only required for Interrupt nesting): If nested
+interrupts are desired, clear the PSTATE.I bit (and potentially PSTATE.F for
+FIQs) to allow higher-priority interrupts to be preempt the current context
+handling.
+- **5. Call Specific Handler:** Based on the INTID, dispatch to the appropriate devicespecific
+interrupt handler (e.g., a timer interrupt handler, a UART interrupt
+handler).
+- **6. Disable Interrupts (for nesting):** Before returning from the generic handler,
+re-mask interrupts if they were enabled for nesting. This ensures we return
+to a controlled state. This is required as we are going to restore the context
+back and signal the GIC to mark the interrupt state correctly.
+- **7. Signal End of Interrupt (EOI):** Write to a GIC CPU Interface register to inform
+the GIC that the interrupt has been fully processed. This allows the GIC to
+clear the pending state of the interrupt and potentially forward other pending
+interrupts of lower priority.
+- **8. Restore Context**: Restore the saved state of the interrupted EL0 program.
+- **9. Return from Exception**: Use the eret instruction to return to EL0 and resume
+the interrupted program.
+
+
+
+## 5. GIC - Interrupt #ID finding and acknowledgement
+- **ICC_IAR1_EL1** (Interrupt Acknowledge Register): Reading this register provides
+the Interrupt ID (INTID) of the highest priority pending interrupt. It also implicitly acknowledges the interrupt by causing the GIC to de-assert the
+interrupt signal to the CPU.
+
+i.e  This also implicitly **acknowledges the interrupt to the GIC**, As we are reading the ICC_IAR1_EL1 from CPU.
+```ASM
+// Assuming we are in el1_irq_handler
+get_irq_id_and_ack:
+    mrs x0, icc_iar1_el1 // Read Interrupt Acknowledge Register to get Interrupt ID (INTID)
+                        // This also implicitly acknowledges the interrupt to the GIC.
+                        // x0 now holds the INTID.
+                        // At this point, x0 contains the Interrupt ID.
+                        // We can now use this ID to dispatch to the appropriate handler.
+                        // For example, a jump table or a series of comparisons.
+                        // Example dispatch (simplified)
+                        // Most systems would typically have a better way of dispatching
+    // most likely an array of function pointers.
+    mov x1, #0x30 // Example: Assuming 0x30 is a timer interrupt
+    cmp x0, x1
+b.eq handle_timer_irq
+handle_timer_irq:
+    // ... perform device-specific interrupt handling based on x0 (INTID) ...
+    // After the device-specific handler completes, we need to signal End Of Interrupt.
+    b signal_eoi_and_return
+```
+**NOTE:** I’d want to remind ourselves that reading ICC_IAR1_EL1 both retrieves the
+INTID and implicitly acknowledges the interrupt. We don’t need a separate write
+to acknowledge. That’s a clever design if you ask me.
+
+## 6. GIC - Signalling End of Interrupt
+After we’ve handled the specific interrupt, we must inform the GIC that we’re done.
+This is achieved by writing the same INTID we received from ICC_IAR1_EL1 back to
+ICC_EOIR1_EL1.
+
+```ASM
+signal_eoi_to_gic:
+    // Assuming x0 still holds the INTID that was read from icc_iar1_el1 in earlier snippet
+    msr icc_eoir1_el1, x0 // Write INTID to End Of Interrupt Register
+    // This tells the GIC we're done with this interrupt.
+```
+
+**Thinking time:** `Why do we need ICC_EOIR1_EL1 when ICC_IAR1_EL1 already acknowledges
+the interrupt?` The ICC_IAR1_EL1 acknowledges the CPU’s reception of the interrupt,
+stopping the GIC from sending it again to the CPU interface. ICC_EOIR1_EL1, on the
+other hand, tells the GIC to clear the pending state of the interrupt within the
+GIC Distributor. This allows other interrupts of lower priority (that might have
+been masked by the current interrupt’s priority) to now be forwarded. Without
+signaling EOI, the GIC might think the interrupt is still active and prevent other
+interrupts from reaching the CPU.
+
+- REMEBER: The hardware automatically saves `ELR_EL1` (Exception Link Register) and `SPSR_EL1` (Saved Program Status Register) upon exception entry.
+- They will be restored back when we return back to EL0 using eret.
+
+
+### Final Interrupt code
+
+```ASM
+
+.align 11 // Vector table must be 2KB aligned (2^11)
+el1_vector_table:
+    // ... other exception entries ...
+    // EL1_IRQ: IRQ from EL0 (At offset 0x480)
+    b el1_irq_handler
+    // ... other exception entries ...
+    // Our main IRQ handler entry point from EL0
+el1_irq_handler:
+    // --- Step 1: Save Context ---
+    // Save general-purpose registers that might be clobbered.
+    // x0, x1 are used in this example, so we'll save them only.
+    // In a real system, you'd save all caller-saved registers or push them to a stack.
+    // Recall our save and restore snippets from the previous articles
+    stp x0, x1, [sp, #-16]! // Push x0, x1 onto stack
+    // REMEBER: The hardware automatically saves ELR_EL1 (Exception Link Register) and
+    // SPSR_EL1 (Saved Program Status Register) upon exception entry.
+    // They will be restored back when we return back to EL0 using eret.
+    // --- Step 2: Identify Interrupt Source and Acknowledge ---
+    mrs x0, icc_iar1_el1 // Read Interrupt Acknowledge Register
+    // x0 now holds the Interrupt ID (INTID).
+    // This also implicitly acknowledges the interrupt.
+
+    // --- Step 3: Handle Nested Interrupts (Optional) ---
+    // If we want to allow higher-priority interrupts to preempt us, we can re-enable IRQs here.
+    // This involves clearing the I bit in PSTATE.
+    // For now, let's keep them masked for simplicity in this initial flow.
+    // For nested interrupts, you would typically have a more complex
+    // interrupt prioritization and re-enabling strategy.
+    // --- Step 4: Dispatch to Specific Handler ---
+    // In a real system, you'd have a dispatch table or a series of comparisons
+    // to call the appropriate device driver handler based on the INTID in x0.
+    // For demonstration, let's just simulate a simple handler.
+    // Example: If INTID is 0x30 (as an example)
+    cmp x0, #0x30
+    b.eq handle_timer_irq
+    // If it's not our specific handler, perhaps a default or error handler
+    b handle_unknown_irq
+
+handle_timer_irq:
+    // This is our device-specific timer interrupt handler.
+    // Here, you would interact with the timer hardware, clear its pending bit, etc.
+    // For example, read a timer register, increment a counter.
+    mov x1, #0xDEADBEEF // Simulate some work
+    // ... actual timer handling code ...
+    b irq_handler_done
+
+handle_unknown_irq:
+    // Log an error or take appropriate action for an unhandled interrupt
+    mov x1, #0xBADC0DE // Simulate error handling
+    // ... error handling code ...
+
+irq_handler_done:
+    // --- Step 5: Signal End of Interrupt (EOI) ---
+    // Assuming x0 still holds the original INTID
+    msr icc_eoir1_el1, x0 // Write INTID to End Of Interrupt Register
+    // --- Step 6: Restore Context ---
+    ldp x0, x1, [sp], #16 // Pop x0, x1 from stack
+    // --- Step 7: Return from Exception ---
+    eret // Return from Exception to EL0
+
+
+```
