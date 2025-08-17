@@ -4,7 +4,8 @@ Then we try to multiple function call from reset_handler
 
 -----------------------------------------------------------------------------------------------------
 # How EL1 handles exception from EL0
-<img width="1195" height="720" alt="image" src="https://github.com/user-attachments/assets/c1f8e97a-b94b-433d-b805-5bf946803f82" />
+<img width="1142" height="512" alt="Screenshot 2025-08-17 181714" src="https://github.com/user-attachments/assets/06dce871-cb7a-4689-94fb-a4b132c33fb0" />
+
 
 ## Triggering the System Call from EL0
 ```ASM
