@@ -347,6 +347,36 @@ interrupts of lower priority.
 - **8. Restore Context**: Restore the saved state of the interrupted EL0 program.
 - **9. Return from Exception**: Use the eret instruction to return to EL0 and resume
 the interrupted program.
+
+
+
+## 5. GIC - Interrupt #ID finding and acknowledgement
+- **ICC_IAR1_EL1** (Interrupt Acknowledge Register): Reading this register provides
+the Interrupt ID (INTID) of the highest priority pending interrupt. It also implicitly acknowledges the interrupt by causing the GIC to de-assert the
+interrupt signal to the CPU.
+
+i.e  This also implicitly **acknowledges the interrupt to the GIC**, As we are reading the ICC_IAR1_EL1 from CPU.
+```ASM
+// Assuming we are in el1_irq_handler
+get_irq_id_and_ack:
+    mrs x0, icc_iar1_el1 // Read Interrupt Acknowledge Register to get Interrupt ID (INTID)
+                        // This also implicitly acknowledges the interrupt to the GIC.
+                        // x0 now holds the INTID.
+                        // At this point, x0 contains the Interrupt ID.
+                        // We can now use this ID to dispatch to the appropriate handler.
+                        // For example, a jump table or a series of comparisons.
+                        // Example dispatch (simplified)
+                        // Most systems would typically have a better way of dispatching
+    // most likely an array of function pointers.
+    mov x1, #0x30 // Example: Assuming 0x30 is a timer interrupt
+    cmp x0, x1
+b.eq handle_timer_irq
+handle_timer_irq:
+    // ... perform device-specific interrupt handling based on x0 (INTID) ...
+    // After the device-specific handler completes, we need to signal End Of Interrupt.
+    b signal_eoi_and_return
+``
+
 -----------------------------------------------------------------------------------------------------
 ## Raspberry Pi 4 Model B Boot Sequence
 
