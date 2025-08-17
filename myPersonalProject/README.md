@@ -231,11 +231,11 @@ that switch from NS to S world.
 
 
 -----------------------------------------------------------------------------------------------------
-# 3rd pdf
+
 
 
 -----------------------------------------------------------------------------------------------------
-## Raspberry Pi 4 Model B Boot Sequence
+# Raspberry Pi 4 Model B Boot Sequence
 
 ### 1.Power-On and Initial Hardware Initialization
 - Power Application: Power is supplied via the USB-C port, and the Voltage
