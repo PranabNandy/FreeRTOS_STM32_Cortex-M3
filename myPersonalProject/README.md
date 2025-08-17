@@ -405,8 +405,72 @@ interrupts from reaching the CPU.
 - They will be restored back when we return back to EL0 using eret.
 
 
+### Final Interrupt code
+
+```ASM
+
+.align 11 // Vector table must be 2KB aligned (2^11)
+el1_vector_table:
+    // ... other exception entries ...
+    // EL1_IRQ: IRQ from EL0 (At offset 0x480)
+    b el1_irq_handler
+    // ... other exception entries ...
+    // Our main IRQ handler entry point from EL0
+el1_irq_handler:
+    // --- Step 1: Save Context ---
+    // Save general-purpose registers that might be clobbered.
+    // x0, x1 are used in this example, so we'll save them only.
+    // In a real system, you'd save all caller-saved registers or push them to a stack.
+    // Recall our save and restore snippets from the previous articles
+    stp x0, x1, [sp, #-16]! // Push x0, x1 onto stack
+    // REMEBER: The hardware automatically saves ELR_EL1 (Exception Link Register) and
+    // SPSR_EL1 (Saved Program Status Register) upon exception entry.
+    // They will be restored back when we return back to EL0 using eret.
+    // --- Step 2: Identify Interrupt Source and Acknowledge ---
+    mrs x0, icc_iar1_el1 // Read Interrupt Acknowledge Register
+    // x0 now holds the Interrupt ID (INTID).
+    // This also implicitly acknowledges the interrupt.
+
+    // --- Step 3: Handle Nested Interrupts (Optional) ---
+    // If we want to allow higher-priority interrupts to preempt us, we can re-enable IRQs here.
+    // This involves clearing the I bit in PSTATE.
+    // For now, let's keep them masked for simplicity in this initial flow.
+    // For nested interrupts, you would typically have a more complex
+    // interrupt prioritization and re-enabling strategy.
+    // --- Step 4: Dispatch to Specific Handler ---
+    // In a real system, you'd have a dispatch table or a series of comparisons
+    // to call the appropriate device driver handler based on the INTID in x0.
+    // For demonstration, let's just simulate a simple handler.
+    // Example: If INTID is 0x30 (as an example)
+    cmp x0, #0x30
+    b.eq handle_timer_irq
+    // If it's not our specific handler, perhaps a default or error handler
+    b handle_unknown_irq
+
+handle_timer_irq:
+    // This is our device-specific timer interrupt handler.
+    // Here, you would interact with the timer hardware, clear its pending bit, etc.
+    // For example, read a timer register, increment a counter.
+    mov x1, #0xDEADBEEF // Simulate some work
+    // ... actual timer handling code ...
+    b irq_handler_done
+
+handle_unknown_irq:
+    // Log an error or take appropriate action for an unhandled interrupt
+    mov x1, #0xBADC0DE // Simulate error handling
+    // ... error handling code ...
+
+irq_handler_done:
+    // --- Step 5: Signal End of Interrupt (EOI) ---
+    // Assuming x0 still holds the original INTID
+    msr icc_eoir1_el1, x0 // Write INTID to End Of Interrupt Register
+    // --- Step 6: Restore Context ---
+    ldp x0, x1, [sp], #16 // Pop x0, x1 from stack
+    // --- Step 7: Return from Exception ---
+    eret // Return from Exception to EL0
 
 
+```
 
 
 -----------------------------------------------------------------------------------------------------
