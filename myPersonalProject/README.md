@@ -207,7 +207,8 @@ return_to_el1:
 sync_exception_entry:
     mrs x9, esr_el3 // Read Exception Syndrome Register
     and x10, x9, #0x3F // Extract exception class
-    cmp x10, #0x17 // Check whether it was secure monitor call (0x17 is the value for smc from EL1/b.eq smc_handler
+    cmp x10, #0x17 // Check whether it was secure monitor call (0x17 is the value for smc from EL1/
+    b.eq smc_handler
     // Code for handling other sync exceptions
 smc_hanlder:
     // Based on the request ID, decide whether switch to secure world is needed or not
