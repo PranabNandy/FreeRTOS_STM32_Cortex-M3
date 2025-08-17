@@ -1,4 +1,5 @@
-1. What is an SoC?
+What is an SoC?
+ 
 A System on Chip (SoC) is an integrated circuit that consolidates multiple components of a computer or electronic system onto a single chip. Unlike traditional systems where the CPU, memory, and peripherals are separate entities connected via a motherboard, an SoC integrates these into a compact, power-efficient package. 
 Key Components of an SoC:
 CPU (Central Processing Unit): The brain of the system, executing instructions. In modern SoCs, this is often a multi-core processor (e.g., ARM Cortex-A series in AArch64).
@@ -14,17 +15,21 @@ Interconnect: Buses like AMBA (Advanced Microcontroller Bus Architecture) to lin
 Power Management Unit (PMU): Controls power states for efficiency.
 
 Why SoCs Matter in Embedded Systems:
-Compact size and low power consumption make them ideal for devices like smartphones, IoT gadgets, and the Raspberry Pi.
+- Compact size and low power consumption make them ideal for devices like smartphones, IoT gadgets, and the Raspberry Pi.
 
-Cost-effective for mass production.
+- Cost-effective for mass production.
 
-Highly customizable for specific applications (e.g., automotive, medical devices).
+- Highly customizable for specific applications (e.g., automotive, medical devices).
 
-Example: The Raspberry Pi 4’s Broadcom BCM2711 SoC integrates a quad-core ARM Cortex-A72 CPU, a VideoCore VI GPU, and various peripherals, all tailored for a single-board computer.
+- Example: The Raspberry Pi 4’s Broadcom BCM2711 SoC integrates a quad-core ARM Cortex-A72 CPU, a VideoCore VI GPU, and various peripherals, all tailored for a single-board computer.
+  
+------------------------------------------------------------------------
 
 2. AArch64 Architecture and Relevance
+
 AArch64 is the 64-bit execution state of the ARMv8-A architecture, developed by ARM Holdings. It’s widely used in modern embedded systems, servers, and mobile devices due to its efficiency and scalability.
-Key Features of AArch64:
+#### Key Features of AArch64:
+
 64-bit Registers: 31 general-purpose registers (X0-X30), each 64 bits wide, plus a stack pointer (SP) and program counter (PC).
 
 Instruction Set: AArch64 uses a RISC (Reduced Instruction Set Computer) design, offering simplicity and power efficiency.
@@ -32,17 +37,17 @@ Instruction Set: AArch64 uses a RISC (Reduced Instruction Set Computer) design, 
 Memory Addressing: Supports up to 48-bit virtual addresses (extendable to 52-bit in some implementations), allowing access to large memory spaces.
 
 Exception Levels (EL0-EL3): Defines privilege levels:
-EL0: User applications.
+- EL0: User applications.
 
-EL1: Operating system kernel.
+- EL1: Operating system kernel.
 
-EL2: Hypervisor.
+- EL2: Hypervisor.
 
-EL3: Secure monitor (e.g., firmware or bootloader).
+- EL3: Secure monitor (e.g., firmware or bootloader).
 
-Advanced SIMD (NEON): For parallel processing, useful in multimedia and signal processing.
+- Advanced SIMD (NEON): For parallel processing, useful in multimedia and signal processing.
 
-Relevance to Embedded Systems:
+#### Relevance to Embedded Systems:
 Power efficiency suits battery-powered devices.
 
 Scalability from low-end IoT to high-performance systems like the Raspberry Pi 4.
@@ -51,26 +56,26 @@ Open ecosystem with extensive toolchain support (e.g., GCC, LLVM).
 
 Raspberry Pi 4 Context: The BCM2711 SoC uses four Cortex-A72 cores running in AArch64 mode, making it a perfect platform to explore this architecture.
 
-3. General Boot Sequence (Stages, Power On, etc.)
+## General Boot Sequence (Stages, Power On, etc.)
 The boot sequence of an embedded system with an SoC is the process from power-on to handing control to an operating system or application. It involves multiple stages, each handled by specific hardware or firmware.
-Stage 1: Power-On Reset (POR):
-When power is applied, the SoC’s reset circuitry initializes the CPU and other components to a known state.
+- Stage 1: Power-On Reset (POR):
+   - When power is applied, the SoC’s reset circuitry initializes the CPU and other components to a known state.
 
-Clocks and voltage regulators stabilize.
+   - Clocks and voltage regulators stabilize.
 
-Stage 2: On-Chip Boot ROM:
-The CPU starts executing code from a hardwired Boot ROM (read-only memory) inside the SoC.
+- Stage 2: On-Chip Boot ROM:
+  - The CPU starts executing code from a hardwired Boot ROM (read-only memory) inside the SoC.
 
-This code is minimal, typically loading a bootloader from a predefined location (e.g., flash memory, SD card).
+  - This code is minimal, typically loading a bootloader from a predefined location (e.g., flash memory, SD card).
 
-Configures basic hardware like memory controllers.
+  - Configures basic hardware like memory controllers.
 
-Stage 3: First-Stage Bootloader (FSBL):
-Loaded from external storage (e.g., NAND, NOR flash, or SD card).
+- Stage 3: First-Stage Bootloader (FSBL):
+   - Loaded from external storage (e.g., NAND, NOR flash, or SD card).
 
-Initializes critical peripherals (e.g., DRAM) and sets up a minimal execution environment.
+   - Initializes critical peripherals (e.g., DRAM) and sets up a minimal execution environment.
 
-Often proprietary or SoC-specific (e.g., Broadcom’s bootcode.bin for Raspberry Pi).
+   - Often proprietary or SoC-specific (e.g., Broadcom’s bootcode.bin for Raspberry Pi).
 
 Stage 4: Second-Stage Bootloader (SSBL):
 More sophisticated, like U-Boot or a custom loader.
@@ -211,5 +216,6 @@ Incorrect memory access (e.g., uninitialized DRAM).
 Interrupt misconfiguration causing hangs.
 
 Insight: Use the debugger to verify every hardware interaction—assumptions about timing or state can lead to subtle bugs.
+
 
 
