@@ -297,10 +297,56 @@ interface is the part of the GIC that directly communicates with the ARM process
 
 
 
+Macro level view of its working:
+- **1. Interrupt Source:** An external peripheral (e.g., `a timer, a network controller,
+a GPIO pin`) asserts its interrupt line.
+- **2. GIC Distributor:** The GIC Distributor collects these interrupt requests, manages
+their priority, and determines which core (in an SMP system) should
+receive the interrupt.
+- **3. GIC CPU Interface:** The GIC CPU Interface then signals the ARM core that an
+interrupt is pending. This is what causes the ARM processor to take the
+exception and jump to our `el1_irq_handler.`
+
+To identify which interrupt has occurred and to acknowledge it, our CPU will
+interact with the GIC CPU Interface registers. These registers are memory-mapped,
+meaning we access them by reading from and writing to specific memory addresses.
 
 
+## 4. Interrupt handling flow
 
+Let’s looks at a typical generic interrupt handler at EL1. I would also encourage
+folks to take a look at other kernel implementation and compare how there handling
+logic is written.
+- **1. Save Context:** Preserve the state of the interrupted EL0 program. This includes
+general-purpose registers (X0-X30), floating point registers, and possibly
+some other peripheral registers whose state might be cobbled by EL1.
 
+  `NOTE:` The stack pointer (SP_EL0), and the Exception Link Register (ELR_EL1) and
+Saved Program Status Register (SPSR_EL1) are automatically saved by hardware
+on exception entry.
+- **2. Identify Interrupt Source:** Read a GIC CPU Interface register to determine the
+Interrupt ID (INTID) of the pending interrupt. (Detailed below)
+- **3. Acknowledge Interrupt:** Write to a GIC CPU Interface register to acknowledge
+that the interrupt has been received by the CPU. This prevents the GIC from
+re-signaling the same interrupt. (Detauled below)
+- **4. Enable Interrupts** (Optional, only required for Interrupt nesting): If nested
+interrupts are desired, clear the PSTATE.I bit (and potentially PSTATE.F for
+FIQs) to allow higher-priority interrupts to be preempt the current context
+handling.
+- **5. Call Specific Handler:** Based on the INTID, dispatch to the appropriate devicespecific
+interrupt handler (e.g., a timer interrupt handler, a UART interrupt
+handler).
+- **6. Disable Interrupts (for nesting):** Before returning from the generic handler,
+re-mask interrupts if they were enabled for nesting. This ensures we return
+to a controlled state. This is required as we are going to restore the context
+back and signal the GIC to mark the interrupt state correctly.
+- **7. Signal End of Interrupt (EOI):** Write to a GIC CPU Interface register to inform
+the GIC that the interrupt has been fully processed. This allows the GIC to
+clear the pending state of the interrupt and potentially forward other pending
+interrupts of lower priority.
+- **8. Restore Context**: Restore the saved state of the interrupted EL0 program.
+- **9. Return from Exception**: Use the eret instruction to return to EL0 and resume
+the interrupted program.
 -----------------------------------------------------------------------------------------------------
 ## Raspberry Pi 4 Model B Boot Sequence
 
