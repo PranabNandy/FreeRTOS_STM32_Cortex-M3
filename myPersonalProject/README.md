@@ -375,7 +375,39 @@ handle_timer_irq:
     // ... perform device-specific interrupt handling based on x0 (INTID) ...
     // After the device-specific handler completes, we need to signal End Of Interrupt.
     b signal_eoi_and_return
-``
+```
+**NOTE:** I’d want to remind ourselves that reading ICC_IAR1_EL1 both retrieves the
+INTID and implicitly acknowledges the interrupt. We don’t need a separate write
+to acknowledge. That’s a clever design if you ask me.
+
+## 6. GIC - Signalling End of Interrupt
+After we’ve handled the specific interrupt, we must inform the GIC that we’re done.
+This is achieved by writing the same INTID we received from ICC_IAR1_EL1 back to
+ICC_EOIR1_EL1.
+
+```ASM
+signal_eoi_to_gic:
+    // Assuming x0 still holds the INTID that was read from icc_iar1_el1 in earlier snippet
+    msr icc_eoir1_el1, x0 // Write INTID to End Of Interrupt Register
+    // This tells the GIC we're done with this interrupt.
+```
+
+**Thinking time:** `Why do we need ICC_EOIR1_EL1 when ICC_IAR1_EL1 already acknowledges
+the interrupt?` The ICC_IAR1_EL1 acknowledges the CPU’s reception of the interrupt,
+stopping the GIC from sending it again to the CPU interface. ICC_EOIR1_EL1, on the
+other hand, tells the GIC to clear the pending state of the interrupt within the
+GIC Distributor. This allows other interrupts of lower priority (that might have
+been masked by the current interrupt’s priority) to now be forwarded. Without
+signaling EOI, the GIC might think the interrupt is still active and prevent other
+interrupts from reaching the CPU.
+
+- REMEBER: The hardware automatically saves `ELR_EL1` (Exception Link Register) and `SPSR_EL1` (Saved Program Status Register) upon exception entry.
+- They will be restored back when we return back to EL0 using eret.
+
+
+
+
+
 
 -----------------------------------------------------------------------------------------------------
 ## Raspberry Pi 4 Model B Boot Sequence
