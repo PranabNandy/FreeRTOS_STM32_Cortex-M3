@@ -1,0 +1,3 @@
+- Here we have not used #include<stdio.h>
+- We have not used any printf() function to print anything on the screen
+- We used UART directly to do that
