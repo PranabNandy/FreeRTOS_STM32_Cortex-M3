@@ -1,4 +1,6 @@
 <img width="1791" height="1070" alt="Screenshot 2025-08-17 170436" src="https://github.com/user-attachments/assets/4aae6273-f815-4577-8669-96de5958b422" />
+
+
 ## 1. Vector Table
 
 
@@ -241,4 +243,5 @@ irq_handler_done:
 
 
 ```
+
 
